@@ -22,11 +22,14 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private MemberRepository memberRepository;
+
     @Override
     public Member createMember(String fullName, String email, String address, String phoneNumber,
-    String memberShipType, String startDate, String endDate, WorkoutPlan workoutPlan) {
+                               String memberShipType, String startDate, String endDate, WorkoutPlan workoutPlan) {
+        // Generate a unique member ID
         String memberId = generateNextMemberId();
-        if(memberId != null) {
+        if (memberId != null) {
+            // Create and save the new Member
             Member member = memberRepository.insert(new Member(fullName, email, address, phoneNumber, memberId, memberShipType, startDate, endDate, workoutPlan));
             logger.log("New Member added, Member ID: " + memberId);
             return member;
@@ -34,18 +37,29 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalStateException("Member limit reached. Cannot create more members.");
         }
     }
+
     @Override
     public List<Member> allMembers() {
+        // Retrieve all members from the repository
         return memberRepository.findAll();
     }
+
+    @Override
+    public Optional<Member> findMemberById(String memberId) {
+        return Optional.empty();
+    }
+
     @Override
     public Optional<Member> memberById(String memberId) {
+        // Find a member by their member ID
         return memberRepository.findByMemberId(memberId);
     }
+
     @Override
     public Member updateMember(String memberId, MemberRequest memberRequest) {
+        // Update an existing Member's details
         Optional<Member> optionalMember = memberRepository.findByMemberId(memberId);
-        if(optionalMember.isPresent()) {
+        if (optionalMember.isPresent()) {
             Member member = optionalMember.get();
             member.setAddress(memberRequest.getAddress());
             member.setEmail(memberRequest.getEmail());
@@ -56,31 +70,34 @@ public class MemberServiceImpl implements MemberService {
             member.setStartDate(memberRequest.getStartDate());
             logger.log("Member updated, ID: " + memberId);
             return memberRepository.save(member);
-        }else {
-            throw new NoSuchElementException();
+        } else {
+            throw new NoSuchElementException("Member not found for ID: " + memberId);
         }
     }
 
     @Override
     public void deleteByMemberId(String memberId) {
+        // Delete a member by their member ID
         Optional<Member> member = memberRepository.findByMemberId(memberId);
-        if(member.isPresent()) {
+        if (member.isPresent()) {
             logger.log("Member deleted, ID: " + memberId);
             memberRepository.delete(member.get());
         } else {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("Member not found for ID: " + memberId);
         }
     }
+
     private String generateNextMemberId() {
+        // Generate the next unique member ID
         List<Member> members = allMembers();
         Set<String> usedIds = members.stream().map(Member::getMemberId).collect(Collectors.toSet());
-    
+
         for (int i = 1; i <= 9999; i++) {
             String candidateId = String.format("%04d", i);
             if (!usedIds.contains(candidateId)) {
-                return candidateId;
+                return candidateId; // Return the first unused ID
             }
         }
-        return null;
+        return null; // No available ID found
     }
 }

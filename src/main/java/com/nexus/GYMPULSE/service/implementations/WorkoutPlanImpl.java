@@ -19,14 +19,14 @@ import com.nexus.GYMPULSE.utils.GymLogger;
 @Service
 public class WorkoutPlanImpl implements WorkoutPlanService {
     private GymLogger logger = GymLogger.getInstance();
-    
+
     @Autowired
     private WorkoutPlanRepository workoutPlanRepository;
 
     @Override
     public WorkoutPlan createWorkoutPlan(String memberId, String trainerId, String startDate, String endDate,
-            List<DailyWorkout> dailyWorkouts) {
-        String id = memberId + trainerId;
+                                         List<DailyWorkout> dailyWorkouts) {
+        String id = memberId + trainerId; // Unique ID based on member and trainer
         WorkoutPlan workoutPlan = workoutPlanRepository
                 .insert(new WorkoutPlan(id, memberId, trainerId, startDate, endDate, dailyWorkouts));
         logger.log("New Workout Plan created, ID: " + id);
@@ -36,6 +36,11 @@ public class WorkoutPlanImpl implements WorkoutPlanService {
     @Override
     public List<WorkoutPlan> allWorkoutPlans() {
         return workoutPlanRepository.findAll();
+    }
+
+    @Override
+    public Optional<WorkoutPlan> findWorkoutPlanByTrainerAndMemberId(String trainerId, String memberId) {
+        return Optional.empty();
     }
 
     @Override
@@ -56,13 +61,13 @@ public class WorkoutPlanImpl implements WorkoutPlanService {
     }
 
     @Override
-    public void deleteByIds(String trainerId, String memberId) {
+    public void deleteByTrainerAndMemberId(String trainerId, String memberId) {
         Optional<WorkoutPlan> workoutplan = workoutPlanRepository.findByMemberIdAndTrainerId(memberId, trainerId);
         if (workoutplan.isPresent()) {
-            logger.log("WorkoutPlan deleted, ID: " + memberId + trainerId);
+            logger.log("Workout Plan deleted, ID: " + memberId + trainerId);
             workoutPlanRepository.delete(workoutplan.get());
         } else {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("No Workout Plan found for member ID: " + memberId + " and trainer ID: " + trainerId);
         }
     }
 
@@ -76,10 +81,10 @@ public class WorkoutPlanImpl implements WorkoutPlanService {
             workoutPlan.setStartDate(workoutPlanRequest.getStartDate());
             workoutPlan.setEndDate(workoutPlanRequest.getEndDate());
             workoutPlan.setDailyWorkouts(workoutPlanRequest.getDailyWorkouts());
-            logger.log("Workout Plan updated, ID:" + id);
+            logger.log("Workout Plan updated, ID: " + id);
             return workoutPlanRepository.save(workoutPlan);
         } else {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("No Workout Plan found for ID: " + id);
         }
     }
 
@@ -87,23 +92,27 @@ public class WorkoutPlanImpl implements WorkoutPlanService {
     public void deleteById(String id) {
         Optional<WorkoutPlan> workoutPlan = workoutPlanRepository.findById(id);
         if (workoutPlan.isPresent()) {
-            logger.log("Workout Plan removed, ID:" + id);
+            logger.log("Workout Plan removed, ID: " + id);
             workoutPlanRepository.delete(workoutPlan.get());
         } else {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("No Workout Plan found for ID: " + id);
         }
     }
 
     @Override
+    public void deleteByIds(String trainerId, String memberId) {
+
+    }
+
+    @Override
     public WorkoutPlan createWorkoutPlanWithStrategy(String memberId, String trainerId, String startDate,
-            String endDate, WorkoutStrategy strategy) {
-        String id = memberId + trainerId;
+                                                     String endDate, WorkoutStrategy strategy) {
+        String id = memberId + trainerId; // Unique ID based on member and trainer
         List<DailyWorkout> dailyWorkouts = strategy.generateRoutine();
         WorkoutPlan workoutPlan = workoutPlanRepository
                 .insert(new WorkoutPlan(id, memberId, trainerId, startDate, endDate, dailyWorkouts));
-        
+
         logger.log("Workout Plan with strategy created, ID: " + id);
         return workoutPlan;
     }
-
 }

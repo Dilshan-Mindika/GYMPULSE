@@ -19,34 +19,45 @@ import com.nexus.GYMPULSE.utils.GymLogger;
 public class TrainerServiceImpl implements TrainerService {
 
     private GymLogger logger = GymLogger.getInstance();
+
     @Autowired
     private TrainerRepository trainerRepository;
 
     @Override
     public Trainer createTrainer(String speciality, Double salary, String certificationNumber, String fullName,
-            String phoneNumber, String address, String email) {
-        String trainerId = generateNextMemberId();
+                                 String phoneNumber, String address, String email) {
+        // Generate a unique trainer ID
+        String trainerId = generateNextTrainerId();
         if (trainerId != null) {
-            Trainer trainer = trainerRepository.insert(new Trainer(trainerId, speciality, salary, certificationNumber, fullName, 
-            phoneNumber, address, email));
+            Trainer trainer = trainerRepository.insert(new Trainer(trainerId, speciality, salary, certificationNumber,
+                    fullName, phoneNumber, address, email));
             logger.log("New Trainer created, Trainer ID: " + trainerId);
             return trainer;
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Trainer limit reached. Cannot create more trainers.");
         }
     }
 
     @Override
     public List<Trainer> allTrainers() {
+        // Retrieve all trainers from the repository
         return trainerRepository.findAll();
     }
 
     @Override
+    public Optional<Trainer> findTrainerById(String trainerId) {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Trainer> trainerById(String trainerId) {
+        // Find a trainer by their trainer ID
         return trainerRepository.findByTrainerId(trainerId);
     }
+
     @Override
     public Trainer updateTrainer(String trainerId, TrainerRequest trainerRequest) {
+        // Update an existing trainer's details
         Optional<Trainer> optionalTrainer = trainerRepository.findByTrainerId(trainerId);
         if (optionalTrainer.isPresent()) {
             Trainer trainer = optionalTrainer.get();
@@ -60,31 +71,33 @@ public class TrainerServiceImpl implements TrainerService {
             logger.log("Trainer updated, Trainer ID: " + trainerId);
             return trainerRepository.save(trainer);
         } else {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("Trainer not found for ID: " + trainerId);
         }
     }
-        
+
     @Override
     public void deleteByTrainerId(String trainerId) {
+        // Delete a trainer by their trainer ID
         Optional<Trainer> trainer = trainerRepository.findByTrainerId(trainerId);
         if (trainer.isPresent()) {
             logger.log("Trainer deleted, ID: " + trainerId);
             trainerRepository.delete(trainer.get());
         } else {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("Trainer not found for ID: " + trainerId);
         }
     }
 
-    private String generateNextMemberId() {
+    private String generateNextTrainerId() {
+        // Generate the next unique trainer ID
         List<Trainer> trainers = allTrainers();
         Set<String> usedIds = trainers.stream().map(Trainer::getTrainerId).collect(Collectors.toSet());
 
         for (int i = 1; i <= 9999; i++) {
             String candidateId = String.format("%04d", i);
             if (!usedIds.contains(candidateId)) {
-                return candidateId;
+                return candidateId; // Return the first unused ID
             }
         }
-        return null;
+        return null; // No available ID found
     }
 }
