@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/equipment") // Base URL for equipment-related endpoints
+@RequestMapping("/equipment") // Base URL for equipment-related endpoints
 public class EquipmentController {
 
     @Autowired
