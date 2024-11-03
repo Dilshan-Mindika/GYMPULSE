@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import com.nexus.GYMPULSE.model.person.Trainer;
 
+// Repository interface for managing Trainer entities in MongoDB
 @Repository
-public interface TrainerRepository extends MongoRepository<Trainer, ObjectId>{
+public interface TrainerRepository extends MongoRepository<Trainer, ObjectId> {
+    // Finds a Trainer by their unique trainer ID
     Optional<Trainer> findByTrainerId(String trainerId);
 }

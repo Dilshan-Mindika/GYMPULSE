@@ -7,7 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import com.nexus.GYMPULSE.model.workoutplan.WorkoutPlan;
 
+// Repository interface for managing WorkoutPlan entities in MongoDB
 @Repository
 public interface WorkoutPlanRepository extends MongoRepository<WorkoutPlan, String> {
+    // Finds a WorkoutPlan by its associated member ID and trainer ID
     Optional<WorkoutPlan> findByMemberIdAndTrainerId(String memberId, String trainerId);
 }
