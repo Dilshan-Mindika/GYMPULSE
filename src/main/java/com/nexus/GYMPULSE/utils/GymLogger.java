@@ -24,13 +24,17 @@ public class GymLogger {
         return instance;
     }
 
-    public void log(String message) {
+    public synchronized void log(String message) {
         try (PrintWriter out = new PrintWriter(new FileWriter(LOG_FILE, true))) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String timestamp = dateFormat.format(new Date());
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             out.println(timestamp + " - " + message);
         } catch (IOException e) {
-            e.printStackTrace();
+            handleLoggingError(e);
         }
+    }
+
+    private void handleLoggingError(IOException e) {
+        // You can log this error to a different output or handle it according to your needs.
+        System.err.println("Logging error: " + e.getMessage());
     }
 }
