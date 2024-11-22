@@ -18,17 +18,19 @@ import com.nexus.GYMPULSE.utils.GymLogger;
 
 @Service
 public class WorkoutPlanImpl implements WorkoutPlanService {
+
     private GymLogger logger = GymLogger.getInstance();
 
     @Autowired
     private WorkoutPlanRepository workoutPlanRepository;
 
     @Override
-    public WorkoutPlan createWorkoutPlan(String memberId, String trainerId, String startDate, String endDate,
-                                         List<DailyWorkout> dailyWorkouts) {
+    public WorkoutPlan createWorkoutPlan(String memberId, String trainerId, String startDate, String endDate, List<DailyWorkout> dailyWorkouts) {
         String id = memberId + trainerId; // Unique ID based on member and trainer
-        WorkoutPlan workoutPlan = workoutPlanRepository
-                .insert(new WorkoutPlan(id, memberId, trainerId, startDate, endDate, dailyWorkouts));
+        WorkoutPlan workoutPlan = new WorkoutPlan(id, memberId, trainerId, startDate, endDate, dailyWorkouts);
+
+        // Save the workout plan in the database
+        workoutPlan = workoutPlanRepository.insert(workoutPlan);
         logger.log("New Workout Plan created, ID: " + id);
         return workoutPlan;
     }
@@ -40,7 +42,7 @@ public class WorkoutPlanImpl implements WorkoutPlanService {
 
     @Override
     public Optional<WorkoutPlan> findWorkoutPlanByTrainerAndMemberId(String trainerId, String memberId) {
-        return Optional.empty();
+        return Optional.empty(); // Currently not implemented
     }
 
     @Override
@@ -62,10 +64,10 @@ public class WorkoutPlanImpl implements WorkoutPlanService {
 
     @Override
     public void deleteByTrainerAndMemberId(String trainerId, String memberId) {
-        Optional<WorkoutPlan> workoutplan = workoutPlanRepository.findByMemberIdAndTrainerId(memberId, trainerId);
-        if (workoutplan.isPresent()) {
+        Optional<WorkoutPlan> workoutPlan = workoutPlanRepository.findByMemberIdAndTrainerId(memberId, trainerId);
+        if (workoutPlan.isPresent()) {
             logger.log("Workout Plan deleted, ID: " + memberId + trainerId);
-            workoutPlanRepository.delete(workoutplan.get());
+            workoutPlanRepository.delete(workoutPlan.get());
         } else {
             throw new NoSuchElementException("No Workout Plan found for member ID: " + memberId + " and trainer ID: " + trainerId);
         }
@@ -101,17 +103,19 @@ public class WorkoutPlanImpl implements WorkoutPlanService {
 
     @Override
     public void deleteByIds(String trainerId, String memberId) {
-
+        // Method not implemented, left empty for now
     }
 
     @Override
-    public WorkoutPlan createWorkoutPlanWithStrategy(String memberId, String trainerId, String startDate,
-                                                     String endDate, WorkoutStrategy strategy) {
+    public WorkoutPlan createWorkoutPlanWithStrategy(String memberId, String trainerId, String startDate, String endDate, WorkoutStrategy strategy) {
         String id = memberId + trainerId; // Unique ID based on member and trainer
         List<DailyWorkout> dailyWorkouts = strategy.generateRoutine();
-        WorkoutPlan workoutPlan = workoutPlanRepository
-                .insert(new WorkoutPlan(id, memberId, trainerId, startDate, endDate, dailyWorkouts));
 
+        // Create the workout plan with the strategy-generated workouts
+        WorkoutPlan workoutPlan = new WorkoutPlan(id, memberId, trainerId, startDate, endDate, dailyWorkouts);
+
+        // Save the workout plan in the database
+        workoutPlan = workoutPlanRepository.insert(workoutPlan);
         logger.log("Workout Plan with strategy created, ID: " + id);
         return workoutPlan;
     }
