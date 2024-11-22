@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class EquipmentRequest {
+    private String id;           // Unique identifier
     private String name;         // Name of the equipment
     private String type;         // Type of equipment (e.g., Cardio, Strength)
     private String brand;        // Brand of the equipment
