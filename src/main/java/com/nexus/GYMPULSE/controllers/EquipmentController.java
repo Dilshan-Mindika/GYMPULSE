@@ -17,9 +17,8 @@ public class EquipmentController {
     private EquipmentService equipmentService;
 
     @PostMapping
-    public ResponseEntity<Equipment> addEquipment(@RequestBody Equipment equipment) {
-        Equipment savedEquipment = equipmentService.addEquipment(equipment);
-        return ResponseEntity.ok(savedEquipment); // Return saved equipment
+    public Equipment addEquipment(@RequestBody Equipment equipment) {
+        return equipmentService.addEquipment(equipment); // Pass the whole equipment object
     }
 
     @GetMapping
