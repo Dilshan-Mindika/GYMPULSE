@@ -13,7 +13,7 @@ import com.nexus.GYMPULSE.model.workoutplan.WorkoutPlan;
 import com.nexus.GYMPULSE.requests.MemberRequest;
 import com.nexus.GYMPULSE.service.interfaces.MemberService;
 
-@CrossOrigin(origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/Members") // Base URL for member-related endpoints
 public class MemberController {
