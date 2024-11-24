@@ -12,7 +12,7 @@ import com.nexus.GYMPULSE.model.person.Trainer;
 import com.nexus.GYMPULSE.requests.TrainerRequest;
 import com.nexus.GYMPULSE.service.interfaces.TrainerService;
 
-@CrossOrigin(origins = "http://localhost:5173/Trainers")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/Trainers") // Base URL for trainer-related endpoints
 public class TrainerController {

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173/Feedbacks")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/feedbacks")
 public class FeedbackController {
