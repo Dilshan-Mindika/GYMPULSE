@@ -12,6 +12,8 @@ import com.nexus.GYMPULSE.model.person.Trainer;
 import com.nexus.GYMPULSE.requests.TrainerRequest;
 import com.nexus.GYMPULSE.service.interfaces.TrainerService;
 
+import jakarta.validation.Valid; // Import @Valid
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/Trainers") // Base URL for trainer-related endpoints
@@ -28,19 +30,9 @@ public class TrainerController {
 
     // Endpoint to create a new trainer
     @PostMapping
-    public Trainer createTrainer(@RequestBody TrainerRequest trainerRequest) {
-        // Extracting trainer details from the request
-        String speciality = trainerRequest.getSpeciality();
-        Double salary = trainerRequest.getSalary();
-        String certificationNumber = trainerRequest.getCertificationNumber();
-        String fullName = trainerRequest.getFullName();
-        String phoneNumber = trainerRequest.getPhoneNumber();
-        String address = trainerRequest.getAddress();
-        String email = trainerRequest.getEmail();
-
-        // Creating and returning the new trainer
-        return trainerService.createTrainer(speciality, salary, certificationNumber, fullName,
-                phoneNumber, address, email);
+    public Trainer createTrainer(@Valid @RequestBody TrainerRequest trainerRequest) { // Added @Valid
+        // The service method will now directly accept TrainerRequest
+        return trainerService.createTrainer(trainerRequest);
     }
 
     // Endpoint to retrieve a specific trainer by their ID
@@ -51,7 +43,7 @@ public class TrainerController {
 
     // Endpoint to update an existing trainer's details by their ID
     @PutMapping("/{trainerId}")
-    public Trainer updateTrainer(@PathVariable String trainerId, @RequestBody TrainerRequest trainerRequest) {
+    public Trainer updateTrainer(@PathVariable String trainerId, @Valid @RequestBody TrainerRequest trainerRequest) { // Added @Valid
         return trainerService.updateTrainer(trainerId, trainerRequest); // Update and return the modified trainer
     }
 

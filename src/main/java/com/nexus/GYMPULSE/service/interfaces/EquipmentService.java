@@ -1,14 +1,15 @@
 package com.nexus.GYMPULSE.service.interfaces;
 
 import com.nexus.GYMPULSE.model.equipment.Equipment;
+import com.nexus.GYMPULSE.requests.EquipmentRequest; // Import EquipmentRequest
 
 import java.util.List;
 import java.util.Optional;
 
 public interface EquipmentService {
-    Equipment addEquipment(Equipment equipment);           // Add new equipment
-    List<Equipment> getAllEquipment();                     // Retrieve all equipment
-    Optional<Equipment> getEquipmentById(String id);      // Find equipment by ID
-    Equipment updateEquipment(String id, Equipment equipment); // Update equipment details
-    void deleteEquipment(String id);                        // Delete equipment by ID
+    Equipment addEquipment(EquipmentRequest equipmentRequest); // Changed to EquipmentRequest
+    List<Equipment> getAllEquipment();
+    Optional<Equipment> getEquipmentById(String id);
+    Equipment updateEquipment(String id, EquipmentRequest equipmentRequest); // Changed to EquipmentRequest
+    void deleteEquipment(String id);
 }

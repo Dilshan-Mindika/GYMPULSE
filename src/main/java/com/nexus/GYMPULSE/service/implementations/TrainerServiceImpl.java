@@ -1,40 +1,53 @@
 package com.nexus.GYMPULSE.service.implementations;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+// import java.util.NoSuchElementException; // Replaced with custom exception
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nexus.GYMPULSE.exception.MaxTrainerLimitReachedException; // Import custom exception
+import com.nexus.GYMPULSE.exception.ResourceNotFoundException; // Import custom exception
 import com.nexus.GYMPULSE.model.person.Trainer;
 import com.nexus.GYMPULSE.repositories.TrainerRepository;
 import com.nexus.GYMPULSE.requests.TrainerRequest;
 import com.nexus.GYMPULSE.service.interfaces.TrainerService;
-import com.nexus.GYMPULSE.utils.GymLogger;
+// import com.nexus.GYMPULSE.utils.GymLogger; // Will be removed
 
 @Service
 public class TrainerServiceImpl implements TrainerService {
 
-    private GymLogger logger = GymLogger.getInstance();
+    private static final Logger logger = LoggerFactory.getLogger(TrainerServiceImpl.class); // SLF4J Logger
 
     @Autowired
     private TrainerRepository trainerRepository;
 
     @Override
-    public Trainer createTrainer(String speciality, Double salary, String certificationNumber, String fullName,
-                                 String phoneNumber, String address, String email) {
+    public Trainer createTrainer(TrainerRequest trainerRequest) { // Changed signature
         // Generate a unique trainer ID
         String trainerId = generateNextTrainerId();
         if (trainerId != null) {
-            Trainer trainer = trainerRepository.insert(new Trainer(trainerId, speciality, salary, certificationNumber,
-                    fullName, phoneNumber, address, email));
-            logger.log("New Trainer created, Trainer ID: " + trainerId);
+            Trainer trainer = new Trainer(
+                    trainerId,
+                    trainerRequest.getSpeciality(),
+                    trainerRequest.getSalary(),
+                    trainerRequest.getCertificationNumber(),
+                    trainerRequest.getFullName(),
+                    trainerRequest.getPhoneNumber(),
+                    trainerRequest.getAddress(),
+                    trainerRequest.getEmail()
+            );
+            trainerRepository.insert(trainer);
+            logger.info("New Trainer created, Trainer ID: {}", trainerId); // SLF4J logging
             return trainer;
         } else {
-            throw new IllegalStateException("Trainer limit reached. Cannot create more trainers.");
+            // Throw custom exception for trainer limit
+            throw new MaxTrainerLimitReachedException("Trainer limit reached (max 9999). Cannot create more trainers.");
         }
     }
 
@@ -44,10 +57,11 @@ public class TrainerServiceImpl implements TrainerService {
         return trainerRepository.findAll();
     }
 
-    @Override
-    public Optional<Trainer> findTrainerById(String trainerId) {
-        return Optional.empty();
-    }
+    // Removed findTrainerById as it's redundant with trainerById
+    // @Override
+    // public Optional<Trainer> findTrainerById(String trainerId) {
+    //     return trainerRepository.findByTrainerId(trainerId);
+    // }
 
     @Override
     public Optional<Trainer> trainerById(String trainerId) {
@@ -58,36 +72,38 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public Trainer updateTrainer(String trainerId, TrainerRequest trainerRequest) {
         // Update an existing trainer's details
-        Optional<Trainer> optionalTrainer = trainerRepository.findByTrainerId(trainerId);
-        if (optionalTrainer.isPresent()) {
-            Trainer trainer = optionalTrainer.get();
-            trainer.setSpeciality(trainerRequest.getSpeciality());
-            trainer.setSalary(trainerRequest.getSalary());
-            trainer.setCertificationNumber(trainerRequest.getCertificationNumber());
-            trainer.setFullName(trainerRequest.getFullName());
-            trainer.setPhoneNumber(trainerRequest.getPhoneNumber());
-            trainer.setAddress(trainerRequest.getAddress());
-            trainer.setEmail(trainerRequest.getEmail());
-            logger.log("Trainer updated, Trainer ID: " + trainerId);
-            return trainerRepository.save(trainer);
-        } else {
-            throw new NoSuchElementException("Trainer not found for ID: " + trainerId);
-        }
+        Trainer trainer = trainerRepository.findByTrainerId(trainerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Trainer", "trainerId", trainerId));
+
+        trainer.setSpeciality(trainerRequest.getSpeciality());
+        trainer.setSalary(trainerRequest.getSalary());
+        trainer.setCertificationNumber(trainerRequest.getCertificationNumber());
+        trainer.setFullName(trainerRequest.getFullName());
+        trainer.setPhoneNumber(trainerRequest.getPhoneNumber());
+        trainer.setAddress(trainerRequest.getAddress());
+        trainer.setEmail(trainerRequest.getEmail());
+        logger.info("Trainer updated, Trainer ID: {}", trainerId); // SLF4J logging
+        return trainerRepository.save(trainer);
     }
 
     @Override
     public void deleteByTrainerId(String trainerId) {
         // Delete a trainer by their trainer ID
-        Optional<Trainer> trainer = trainerRepository.findByTrainerId(trainerId);
-        if (trainer.isPresent()) {
-            logger.log("Trainer deleted, ID: " + trainerId);
-            trainerRepository.delete(trainer.get());
-        } else {
-            throw new NoSuchElementException("Trainer not found for ID: " + trainerId);
-        }
+        Trainer trainer = trainerRepository.findByTrainerId(trainerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Trainer", "trainerId", trainerId));
+
+        logger.info("Trainer deleted, ID: {}", trainerId); // SLF4J logging
+        trainerRepository.delete(trainer);
     }
 
     private String generateNextTrainerId() {
+        // Generate the next unique trainer ID.
+        // Current implementation iterates from 1 to 9999.
+        // LIMITATIONS: (Similar to generateNextMemberId)
+        // 1. Performance: Can be inefficient with many trainers.
+        // 2. Scalability: Hardcoded limit of 9999 trainers.
+        // 3. Concurrency: Not safe for concurrent requests.
+        // Consider alternatives like UUIDs or database sequences if the ID format is flexible.
         // Generate the next unique trainer ID
         List<Trainer> trainers = allTrainers();
         Set<String> usedIds = trainers.stream().map(Trainer::getTrainerId).collect(Collectors.toSet());

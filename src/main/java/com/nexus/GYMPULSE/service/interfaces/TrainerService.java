@@ -23,8 +23,7 @@ public interface TrainerService {
      * @param email the email of the trainer
      * @return the created Trainer
      */
-    Trainer createTrainer(String speciality, Double salary, String certificationNumber, String fullName,
-                          String phoneNumber, String address, String email);
+    Trainer createTrainer(TrainerRequest trainerRequest); // Changed signature
 
     /**
      * Retrieves all trainers.
@@ -39,8 +38,7 @@ public interface TrainerService {
      * @param trainerId the ID of the trainer
      * @return an Optional containing the Trainer if found, or empty if not
      */
-    Optional<Trainer> findTrainerById(String trainerId);
-
+    // Optional<Trainer> findTrainerById(String trainerId); // Removed as redundant
     Optional<Trainer> trainerById(String trainerId);
 
     /**

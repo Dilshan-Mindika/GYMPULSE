@@ -19,7 +19,7 @@ public interface DailyWorkoutService {
      * @param exercises a list of exercises for the workout
      * @return the created DailyWorkout
      */
-    DailyWorkout createDailyWorkout(String dayOfWeek, List<Exercise> exercises);
+    DailyWorkout createDailyWorkout(DailyWorkoutRequest dailyWorkoutRequest); // Changed signature
 
     /**
      * Retrieves all daily workouts.
@@ -38,13 +38,14 @@ public interface DailyWorkoutService {
      */
     Optional<DailyWorkout> dailyWorkoutById(String id);
 
-    /**
-     * Finds a daily workout by the day of the week.
-     *
-     * @param dayOfWeek the day of the week
-     * @return an Optional containing the DailyWorkout if found, or empty if not
-     */
-    Optional<DailyWorkout> findDailyWorkoutByDayOfWeek(String dayOfWeek);
+    // Removed findDailyWorkoutByDayOfWeek as it's redundant with dailyWorkoutByDayOfWeek
+    // /**
+    //  * Finds a daily workout by the day of the week.
+    //  *
+    //  * @param dayOfWeek the day of the week
+    //  * @return an Optional containing the DailyWorkout if found, or empty if not
+    //  */
+    // Optional<DailyWorkout> findDailyWorkoutByDayOfWeek(String dayOfWeek);
 
     /**
      * Updates an existing daily workout.

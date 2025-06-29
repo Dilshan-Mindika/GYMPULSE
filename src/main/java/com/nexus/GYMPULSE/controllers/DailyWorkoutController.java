@@ -9,9 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.nexus.GYMPULSE.model.workoutplan.DailyWorkout;
-import com.nexus.GYMPULSE.model.workoutplan.Exercise;
+// import com.nexus.GYMPULSE.model.workoutplan.Exercise; // No longer directly used in controller
 import com.nexus.GYMPULSE.requests.DailyWorkoutRequest;
 import com.nexus.GYMPULSE.service.interfaces.DailyWorkoutService;
+
+import jakarta.validation.Valid; // Import @Valid
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -24,33 +26,36 @@ public class DailyWorkoutController {
     // Endpoint to get all daily workouts
     @GetMapping
     public ResponseEntity<List<DailyWorkout>> getAllDailyWorkouts() {
-        return new ResponseEntity<List<DailyWorkout>>(dailyWorkoutService.allDailyWorkouts(), HttpStatus.OK);
+        return ResponseEntity.ok(dailyWorkoutService.allDailyWorkouts());
     }
 
     // Endpoint to get a specific daily workout by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<DailyWorkout>> getDailyWorkoutById(@PathVariable String id) {
-        return new ResponseEntity<Optional<DailyWorkout>>(dailyWorkoutService.dailyWorkoutById(id), HttpStatus.OK);
+    public ResponseEntity<DailyWorkout> getDailyWorkoutById(@PathVariable String id) {
+        return ResponseEntity.ok(dailyWorkoutService.dailyWorkoutById(id)
+                .orElseThrow(() -> new com.nexus.GYMPULSE.exception.ResourceNotFoundException("DailyWorkout", "id", id)));
     }
 
     // Endpoint to get daily workout by day of the week
     @GetMapping("/day/{dayOfWeek}")
-    public ResponseEntity<Optional<DailyWorkout>> getDailyWorkoutByDayOfWeek(@PathVariable String dayOfWeek) {
-        return new ResponseEntity<Optional<DailyWorkout>>(dailyWorkoutService.dailyWorkoutByDayOfWeek(dayOfWeek), HttpStatus.OK);
+    public ResponseEntity<DailyWorkout> getDailyWorkoutByDayOfWeek(@PathVariable String dayOfWeek) {
+        return ResponseEntity.ok(dailyWorkoutService.dailyWorkoutByDayOfWeek(dayOfWeek)
+                .orElseThrow(() -> new com.nexus.GYMPULSE.exception.ResourceNotFoundException("DailyWorkout", "dayOfWeek", dayOfWeek)));
     }
 
     // Endpoint to create a new daily workout plan
     @PostMapping
-    public DailyWorkout createDailyWorkoutPlan(@RequestBody DailyWorkout dailyWorkout) {
-        String dayOfWeek = dailyWorkout.getDayOfWeek(); // Get the day of the week from the request
-        List<Exercise> exercises = dailyWorkout.getExercises(); // Get the list of exercises
-        return dailyWorkoutService.createDailyWorkout(dayOfWeek, exercises); // Create and return the new workout
+    public ResponseEntity<DailyWorkout> createDailyWorkoutPlan(@Valid @RequestBody DailyWorkoutRequest dailyWorkoutRequest) { // Changed to DailyWorkoutRequest and @Valid
+        // Assuming service createDailyWorkout will be updated to take DailyWorkoutRequest
+        DailyWorkout createdWorkout = dailyWorkoutService.createDailyWorkout(dailyWorkoutRequest);
+        return new ResponseEntity<>(createdWorkout, HttpStatus.CREATED);
     }
 
     // Endpoint to update an existing daily workout by ID
     @PutMapping("/{id}")
-    public DailyWorkout updateDailyWorkout(@PathVariable String id, @RequestBody DailyWorkoutRequest dailyWorkoutRequest) {
-        return dailyWorkoutService.updateDailyWorkout(id, dailyWorkoutRequest); // Update and return the updated workout
+    public ResponseEntity<DailyWorkout> updateDailyWorkout(@PathVariable String id, @Valid @RequestBody DailyWorkoutRequest dailyWorkoutRequest) { // Added @Valid
+        DailyWorkout updatedWorkout = dailyWorkoutService.updateDailyWorkout(id, dailyWorkoutRequest); // Service already throws if not found
+        return ResponseEntity.ok(updatedWorkout);
     }
 
     // Endpoint to delete a daily workout by ID

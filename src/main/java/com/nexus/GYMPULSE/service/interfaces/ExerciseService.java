@@ -20,7 +20,7 @@ public interface ExerciseService {
      * @param resTimeSeconds the rest time in seconds
      * @return the created Exercise
      */
-    Exercise createExercise(String name, Integer quantitySets, Integer quantityReps, Integer resTimeSeconds);
+    Exercise createExercise(ExerciseRequest exerciseRequest); // Changed signature
 
     /**
      * Retrieves all exercises.
@@ -35,8 +35,7 @@ public interface ExerciseService {
      * @param id the ID of the exercise
      * @return an Optional containing the Exercise if found, or empty if not
      */
-    Optional<Exercise> findExerciseById(String id);
-
+    // Optional<Exercise> findExerciseById(String id); // Removed as redundant
     Optional<Exercise> exerciseById(String id);
 
     /**

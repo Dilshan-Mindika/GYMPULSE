@@ -12,6 +12,8 @@ import com.nexus.GYMPULSE.model.workoutplan.Exercise;
 import com.nexus.GYMPULSE.requests.ExerciseRequest;
 import com.nexus.GYMPULSE.service.interfaces.ExerciseService;
 
+import jakarta.validation.Valid; // Import @Valid
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/Exercises") // Base URL for Exercise endpoints
@@ -23,38 +25,36 @@ public class ExerciseController {
     // Endpoint to retrieve all exercises
     @GetMapping()
     public ResponseEntity<List<Exercise>> getAllExercises() {
-        return new ResponseEntity<List<Exercise>>(exerciseService.allExercises(), HttpStatus.OK); // Return all exercises with OK status
+        return ResponseEntity.ok(exerciseService.allExercises());
     }
 
     // Endpoint to create a new exercise
     @PostMapping()
-    public Exercise createExercise(@RequestBody ExerciseRequest exerciseRequest) {
-        // Extracting exercise details from the request
-        String name = exerciseRequest.getName();
-        Integer quantitySets = exerciseRequest.getQuantitySets();
-        Integer quantityReps = exerciseRequest.getQuantityReps();
-        Integer resTimeSeconds = exerciseRequest.getResTimeSeconds();
-
-        // Creating and returning the new exercise
-        return exerciseService.createExercise(name, quantitySets, quantityReps, resTimeSeconds);
+    public ResponseEntity<Exercise> createExercise(@Valid @RequestBody ExerciseRequest exerciseRequest) { // Added @Valid
+        // Assuming service createExercise will be updated to take ExerciseRequest
+        Exercise createdExercise = exerciseService.createExercise(exerciseRequest);
+        return new ResponseEntity<>(createdExercise, HttpStatus.CREATED);
     }
 
     // Endpoint to retrieve a specific exercise by its ID
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Exercise>> getExerciseById(@PathVariable String id) {
-        return new ResponseEntity<Optional<Exercise>>(exerciseService.exerciseById(id), HttpStatus.OK); // Return exercise by ID
+    public ResponseEntity<Exercise> getExerciseById(@PathVariable String id) {
+        return ResponseEntity.ok(exerciseService.exerciseById(id)
+                .orElseThrow(() -> new com.nexus.GYMPULSE.exception.ResourceNotFoundException("Exercise", "id", id)));
     }
 
     // Endpoint to update an existing exercise by its ID
     @PutMapping("/{id}")
-    public Exercise updateExercise(@PathVariable String id, @RequestBody ExerciseRequest exerciseRequest) {
-        return exerciseService.updateExercise(id, exerciseRequest); // Update and return the modified exercise
+    public ResponseEntity<Exercise> updateExercise(@PathVariable String id, @Valid @RequestBody ExerciseRequest exerciseRequest) { // Added @Valid
+        Exercise updatedExercise = exerciseService.updateExercise(id, exerciseRequest); // Service already throws if not found
+        return ResponseEntity.ok(updatedExercise);
     }
 
     // Endpoint to clone an existing exercise by its ID
     @PostMapping("/{id}/clone")
-    public Exercise cloneExercise(@PathVariable String id) {
-        return exerciseService.cloneExercise(id); // Clone and return the exercise
+    public ResponseEntity<Exercise> cloneExercise(@PathVariable String id) {
+        Exercise clonedExercise = exerciseService.cloneExercise(id); // Service already throws if not found
+        return ResponseEntity.ok(clonedExercise);
     }
 
     // Endpoint to delete an exercise by its ID

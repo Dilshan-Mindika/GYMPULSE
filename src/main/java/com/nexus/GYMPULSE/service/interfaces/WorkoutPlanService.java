@@ -13,19 +13,18 @@ import com.nexus.GYMPULSE.model.workoutplan.strategies.WorkoutStrategy;
  */
 public interface WorkoutPlanService {
 
-    WorkoutPlan createWorkoutPlan(String memberId, String trainerId, String startDate, String endDate, List<DailyWorkout> dailyWorkouts);
+    WorkoutPlan createWorkoutPlan(WorkoutPlanRequest workoutPlanRequest); // Changed signature
 
     List<WorkoutPlan> allWorkoutPlans();
 
-    Optional<WorkoutPlan> findWorkoutPlanByTrainerAndMemberId(String trainerId, String memberId);
-
+    // Optional<WorkoutPlan> findWorkoutPlanByTrainerAndMemberId(String trainerId, String memberId); // Removed, use findWorkoutPlanByIds
     Optional<WorkoutPlan> findWorkoutPlanById(String id);
 
     List<WorkoutPlan> findWorkoutPlansByMemberId(String memberId);
 
-    Optional<WorkoutPlan> findWorkoutPlanByIds(String trainerId, String memberId);
+    Optional<WorkoutPlan> findWorkoutPlanByIds(String trainerId, String memberId); // Kept this one
 
-    void deleteByTrainerAndMemberId(String trainerId, String memberId);
+    // void deleteByTrainerAndMemberId(String trainerId, String memberId); // Removed, use deleteByIds
 
     WorkoutPlan updateWorkoutPlan(String id, WorkoutPlanRequest workoutPlanRequest);
 
@@ -33,5 +32,5 @@ public interface WorkoutPlanService {
 
     void deleteByIds(String trainerId, String memberId);
 
-    WorkoutPlan createWorkoutPlanWithStrategy(String memberId, String trainerId, String startDate, String endDate, WorkoutStrategy strategy);
+    WorkoutPlan createWorkoutPlanWithStrategy(WorkoutPlanRequest workoutPlanRequest, WorkoutStrategy strategy); // Changed signature
 }

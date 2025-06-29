@@ -25,8 +25,7 @@ public interface MemberService {
      * @param workoutPlan the associated workout plan for the member
      * @return the created Member
      */
-    Member createMember(String fullName, String email, String address, String phoneNumber,
-                        String memberShipType, String startDate, String endDate, WorkoutPlan workoutPlan);
+    Member createMember(MemberRequest memberRequest);
 
     /**
      * Retrieves all members.
@@ -41,8 +40,7 @@ public interface MemberService {
      * @param memberId the ID of the member
      * @return an Optional containing the Member if found, or empty if not
      */
-    Optional<Member> findMemberById(String memberId);
-
+    // Optional<Member> findMemberById(String memberId); // Removed as redundant
     Optional<Member> memberById(String memberId);
 
     /**

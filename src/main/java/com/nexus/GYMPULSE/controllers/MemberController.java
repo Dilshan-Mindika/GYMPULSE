@@ -9,9 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.nexus.GYMPULSE.model.person.Member;
-import com.nexus.GYMPULSE.model.workoutplan.WorkoutPlan;
+// import com.nexus.GYMPULSE.model.workoutplan.WorkoutPlan; // Not directly used in controller methods after refactor
 import com.nexus.GYMPULSE.requests.MemberRequest;
 import com.nexus.GYMPULSE.service.interfaces.MemberService;
+
+import jakarta.validation.Valid; // Import @Valid
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -29,19 +31,9 @@ public class MemberController {
 
     // Endpoint to create a new member
     @PostMapping
-    public Member createMember(@RequestBody MemberRequest memberRequest) {
-        // Extracting member details from the request
-        String fullName = memberRequest.getFullName();
-        String email = memberRequest.getEmail();
-        String address = memberRequest.getAddress();
-        String phoneNumber = memberRequest.getPhoneNumber();
-        String memberShipType = memberRequest.getMemberShipType();
-        String startDate = memberRequest.getStartDate();
-        String endDate = memberRequest.getEndDate();
-        WorkoutPlan workoutPlan = memberRequest.getWorkoutPlan();
-
-        // Creating and returning the new member
-        return memberService.createMember(fullName, email, address, phoneNumber, memberShipType, startDate, endDate, workoutPlan);
+    public Member createMember(@Valid @RequestBody MemberRequest memberRequest) { // Added @Valid
+        // The service method will now directly accept MemberRequest
+        return memberService.createMember(memberRequest);
     }
 
     // Endpoint to retrieve a specific member by their ID
@@ -52,7 +44,7 @@ public class MemberController {
 
     // Endpoint to update an existing member's details by their ID
     @PutMapping("/{memberId}")
-    public Member updateMember(@PathVariable String memberId, @RequestBody MemberRequest memberRequest) {
+    public Member updateMember(@PathVariable String memberId, @Valid @RequestBody MemberRequest memberRequest) { // Added @Valid
         return memberService.updateMember(memberId, memberRequest); // Update and return the modified member
     }
 

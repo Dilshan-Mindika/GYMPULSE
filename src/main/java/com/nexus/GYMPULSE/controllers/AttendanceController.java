@@ -3,7 +3,9 @@ package com.nexus.GYMPULSE.controllers;
 import com.nexus.GYMPULSE.model.attendance.Attendance;
 import com.nexus.GYMPULSE.requests.AttendanceRequest;
 import com.nexus.GYMPULSE.service.interfaces.AttendanceService;
+import jakarta.validation.Valid; // Import @Valid
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus; // Import HttpStatus
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +19,9 @@ public class AttendanceController {
     private AttendanceService attendanceService;
 
     @PostMapping
-    public ResponseEntity<Attendance> recordAttendance(@RequestBody AttendanceRequest attendanceRequest) {
+    public ResponseEntity<Attendance> recordAttendance(@Valid @RequestBody AttendanceRequest attendanceRequest) { // Added @Valid
         Attendance createdAttendance = attendanceService.recordAttendance(attendanceRequest);
-        return ResponseEntity.ok(createdAttendance);
+        return new ResponseEntity<>(createdAttendance, HttpStatus.CREATED); // Return 201 Created
     }
 
     @GetMapping
@@ -30,9 +32,9 @@ public class AttendanceController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Attendance> getAttendanceById(@PathVariable String id) {
-        return attendanceService.getAttendanceById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        // Service should throw ResourceNotFoundException if not found.
+        return ResponseEntity.ok(attendanceService.getAttendanceById(id)
+                .orElseThrow(() -> new com.nexus.GYMPULSE.exception.ResourceNotFoundException("Attendance", "id", id)));
     }
 
     @GetMapping("/member/{memberId}")

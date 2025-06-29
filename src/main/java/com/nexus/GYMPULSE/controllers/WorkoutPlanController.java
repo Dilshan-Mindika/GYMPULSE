@@ -15,6 +15,8 @@ import com.nexus.GYMPULSE.model.workoutplan.strategies.WorkoutStrategy;
 import com.nexus.GYMPULSE.requests.WorkoutPlanRequest;
 import com.nexus.GYMPULSE.service.interfaces.WorkoutPlanService;
 
+import jakarta.validation.Valid; // Import @Valid
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/WorkoutPlans") // Base URL for workout plan-related endpoints
@@ -26,49 +28,51 @@ public class WorkoutPlanController {
     // Endpoint to retrieve all workout plans
     @GetMapping
     public ResponseEntity<List<WorkoutPlan>> getAllWorkoutPlans() {
-        return new ResponseEntity<>(workoutPlanService.allWorkoutPlans(), HttpStatus.OK); // Return all workout plans with OK status
+        return ResponseEntity.ok(workoutPlanService.allWorkoutPlans());
     }
 
     // Endpoint to retrieve a specific workout plan by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<WorkoutPlan>> getWorkoutByIds(@PathVariable String id) {
-        return new ResponseEntity<>(workoutPlanService.findWorkoutPlanById(id), HttpStatus.OK); // Return workout plan by ID
+    public ResponseEntity<WorkoutPlan> getWorkoutByIds(@PathVariable String id) { // Method name is getWorkoutByIds but path is /id
+        return ResponseEntity.ok(workoutPlanService.findWorkoutPlanById(id)
+                .orElseThrow(() -> new com.nexus.GYMPULSE.exception.ResourceNotFoundException("WorkoutPlan", "id", id)));
     }
 
     // Endpoint to retrieve workout plans by member ID
     @GetMapping("/member/{memberId}")
     public ResponseEntity<List<WorkoutPlan>> getWorkoutPlansByMemberId(@PathVariable String memberId) {
-        return new ResponseEntity<>(workoutPlanService.findWorkoutPlansByMemberId(memberId), HttpStatus.OK); // Return workout plans for the specific member
+        // This returns a list. If memberId is not found, it might return an empty list, which is fine.
+        // No ResourceNotFoundException needed here unless a member must exist.
+        return ResponseEntity.ok(workoutPlanService.findWorkoutPlansByMemberId(memberId));
     }
 
     // Endpoint to create a new workout plan
     @PostMapping
-    public WorkoutPlan createWorkoutPlan(@RequestBody WorkoutPlanRequest workoutPlanRequest) {
-        return workoutPlanService.createWorkoutPlan(
-                workoutPlanRequest.getMemberId(),
-                workoutPlanRequest.getTrainerId(),
-                workoutPlanRequest.getStartDate(),
-                workoutPlanRequest.getEndDate(),
-                workoutPlanRequest.getDailyWorkouts()
-        ); // Create and return the new workout plan
+    public ResponseEntity<WorkoutPlan> createWorkoutPlan(@Valid @RequestBody WorkoutPlanRequest workoutPlanRequest) { // Added @Valid
+        // Assuming service createWorkoutPlan will be updated
+        WorkoutPlan createdPlan = workoutPlanService.createWorkoutPlan(workoutPlanRequest);
+        return new ResponseEntity<>(createdPlan, HttpStatus.CREATED);
     }
 
     // Endpoint to update an existing workout plan by ID
     @PutMapping("/{id}")
-    public WorkoutPlan updateWorkoutPlan(@PathVariable String id, @RequestBody WorkoutPlanRequest workoutPlanRequest) {
-        return workoutPlanService.updateWorkoutPlan(id, workoutPlanRequest); // Update and return the modified workout plan
+    public ResponseEntity<WorkoutPlan> updateWorkoutPlan(@PathVariable String id, @Valid @RequestBody WorkoutPlanRequest workoutPlanRequest) { // Added @Valid
+        // Service updateWorkoutPlan already throws ResourceNotFoundException if not found
+        WorkoutPlan updatedPlan = workoutPlanService.updateWorkoutPlan(id, workoutPlanRequest);
+        return ResponseEntity.ok(updatedPlan);
     }
 
     // Endpoint to delete a workout plan by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteByIds(@PathVariable String id) {
-        workoutPlanService.deleteById(id); // Delete the workout plan
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Return no content response
+    public ResponseEntity<Void> deleteByIds(@PathVariable String id) { // Method name is deleteByIds but path is /id
+        // Service deleteById already throws ResourceNotFoundException if not found
+        workoutPlanService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     // Endpoint to create a new workout plan with a specific strategy
     @PostMapping("/withStrategy")
-    public WorkoutPlan createWorkoutPlanWithStrategy(@RequestBody WorkoutPlanRequest workoutPlanRequest, @RequestParam String strategyType) {
+    public ResponseEntity<WorkoutPlan> createWorkoutPlanWithStrategy(@Valid @RequestBody WorkoutPlanRequest workoutPlanRequest, @RequestParam String strategyType) { // Added @Valid
         WorkoutStrategy strategy;
         // Determine the workout strategy based on the request parameter
         switch (strategyType.toLowerCase()) {
@@ -79,14 +83,11 @@ public class WorkoutPlanController {
                 strategy = new StrengthTrainingStrategy(); // Use strength training strategy
                 break;
             default:
-                throw new IllegalArgumentException("Invalid strategy type"); // Handle invalid strategy type
+                // Consider using a custom exception that maps to 400 Bad Request
+                throw new com.nexus.GYMPULSE.exception.BadRequestException("Invalid strategy type: " + strategyType);
         }
-        return workoutPlanService.createWorkoutPlanWithStrategy(
-                workoutPlanRequest.getMemberId(),
-                workoutPlanRequest.getTrainerId(),
-                workoutPlanRequest.getStartDate(),
-                workoutPlanRequest.getEndDate(),
-                strategy // Create the workout plan with the chosen strategy
-        );
+        // Assuming service createWorkoutPlanWithStrategy will be updated
+        WorkoutPlan createdPlan = workoutPlanService.createWorkoutPlanWithStrategy(workoutPlanRequest, strategy);
+        return new ResponseEntity<>(createdPlan, HttpStatus.CREATED);
     }
 }
