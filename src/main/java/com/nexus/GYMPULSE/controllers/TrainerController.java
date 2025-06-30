@@ -37,8 +37,10 @@ public class TrainerController {
 
     // Endpoint to retrieve a specific trainer by their ID
     @GetMapping("/{trainerId}")
-    public ResponseEntity<Optional<Trainer>> getTrainerById(@PathVariable String trainerId) {
-        return new ResponseEntity<Optional<Trainer>>(trainerService.trainerById(trainerId), HttpStatus.OK); // Return trainer by ID
+    public ResponseEntity<Trainer> getTrainerById(@PathVariable String trainerId) {
+        Trainer trainer = trainerService.trainerById(trainerId)
+                .orElseThrow(() -> new com.nexus.GYMPULSE.exception.ResourceNotFoundException("Trainer", "trainerId", trainerId));
+        return ResponseEntity.ok(trainer);
     }
 
     // Endpoint to update an existing trainer's details by their ID

@@ -38,8 +38,10 @@ public class MemberController {
 
     // Endpoint to retrieve a specific member by their ID
     @GetMapping("/{memberId}")
-    public ResponseEntity<Optional<Member>> getMemberById(@PathVariable String memberId) {
-        return new ResponseEntity<Optional<Member>>(memberService.memberById(memberId), HttpStatus.OK); // Return member by ID
+    public ResponseEntity<Member> getMemberById(@PathVariable String memberId) {
+        Member member = memberService.memberById(memberId)
+                .orElseThrow(() -> new com.nexus.GYMPULSE.exception.MemberNotFoundException("Member not found with ID: " + memberId));
+        return ResponseEntity.ok(member);
     }
 
     // Endpoint to update an existing member's details by their ID
